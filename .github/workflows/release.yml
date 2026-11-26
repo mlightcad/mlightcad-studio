@@ -1,0 +1,93 @@
+name: Desktop Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.platform }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows-latest
+            args: '--bundles nsis,msi'
+          - platform: ubuntu-22.04
+            args: '--bundles deb,appimage'
+          - platform: macos-14
+            args: '--target universal-apple-darwin --bundles dmg'
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10.33.4
+          cache: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file \
+            libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev patchelf
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform == 'macos-14' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - name: Cache Rust build
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: 'src-tauri -> target'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify tag matches package.json version
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: |
+          node -e "const v=require('./package.json').version;const t=process.env.GITHUB_REF_NAME.replace(/^v/,'');if(v!==t){console.error('version mismatch: package.json='+v+' tag='+t);process.exit(1)}"
+
+      - name: Build and bundle
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Optional macOS signing / notarization. When the secrets are absent
+          # these are empty strings and Tauri skips signing (unsigned builds).
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        with:
+          tagName: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
+          releaseName: 'MLightCAD Studio __VERSION__'
+          releaseBody: 'See the assets below to download and install MLightCAD Studio for your platform.'
+          releaseDraft: true
+          prerelease: ${{ contains(github.ref_name, '-preview.') }}
+          args: ${{ matrix.args }}
+
+      - name: Upload bundles as workflow artifacts
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: bundles-${{ matrix.platform }}
+          path: src-tauri/target/**/release/bundle/**/*.{exe,msi,AppImage,deb,dmg}
+          if-no-files-found: ignore
+          retention-days: 14

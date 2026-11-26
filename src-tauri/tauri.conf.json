@@ -1,0 +1,54 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "MLightCAD Studio",
+  "version": "../package.json",
+  "identifier": "com.mlightcad.studio",
+  "build": {
+    "beforeDevCommand": "pnpm dev",
+    "devUrl": "http://localhost:5173",
+    "beforeBuildCommand": "pnpm build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "windows": [
+      {
+        "label": "main",
+        "title": "MLightCAD Studio",
+        "width": 1440,
+        "height": 900,
+        "minWidth": 1024,
+        "minHeight": 640,
+        "center": true,
+        "dragDropEnabled": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data: https://cdn.jsdelivr.net; connect-src 'self' ipc: http://ipc.localhost https://cdn.jsdelivr.net; worker-src 'self' blob:; child-src 'self' blob:; object-src 'self'",
+      "devCsp": "default-src 'self' http://localhost:5173; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' http://localhost:5173; style-src 'self' 'unsafe-inline' http://localhost:5173; img-src 'self' data: blob:; font-src 'self' data: https://cdn.jsdelivr.net; connect-src 'self' ipc: http://ipc.localhost ws://localhost:5173 http://localhost:5173 https://cdn.jsdelivr.net; worker-src 'self' blob:; child-src 'self' blob:; object-src 'self'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "category": "GraphicsAndDesign",
+    "shortDescription": "Offline DWG/DXF viewer and editor",
+    "longDescription": "MLightCAD Studio is the desktop edition of MLightCAD, a fully browser-engine based DWG/DXF viewer and editor that works without any backend service.",
+    "fileAssociations": [
+      {
+        "ext": ["dwg", "dxf"],
+        "name": "CAD Drawing",
+        "description": "DWG/DXF drawing",
+        "mimeType": "application/acad",
+        "role": "Editor"
+      }
+    ]
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Permissions required by MLightCAD Studio.",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:menu:default",
+    "core:window:allow-set-title",
+    "core:window:allow-is-fullscreen",
+    "core:window:allow-set-fullscreen",
+    "core:event:default",
+    "dialog:allow-open",
+    "dialog:allow-message",
+    "fs:allow-read-file",
+    {
+      "identifier": "fs:scope",
+      "allow": ["**"]
+    },
+    "store:default",
+    "window-state:default",
+    "opener:default"
+  ]
+}
