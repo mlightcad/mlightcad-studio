@@ -2,6 +2,7 @@ import { readFile } from '@tauri-apps/plugin-fs'
 import { open } from '@tauri-apps/plugin-dialog'
 
 import { isTauri } from './platform'
+import { hostT } from '../i18n'
 
 export const DRAWING_EXTENSIONS = ['dwg', 'dxf']
 
@@ -25,7 +26,7 @@ export const pickDrawingFile = async (): Promise<string | null> => {
   const selected = await open({
     multiple: false,
     directory: false,
-    filters: [{ name: 'CAD Drawings', extensions: DRAWING_EXTENSIONS }]
+    filters: [{ name: hostT().dialog.cadDrawings, extensions: DRAWING_EXTENSIONS }]
   })
   return typeof selected === 'string' ? selected : null
 }

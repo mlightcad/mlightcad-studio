@@ -19,6 +19,7 @@
     },
     "store:default",
     "window-state:default",
-    "opener:default"
+    "opener:default",
+    "os:allow-locale"
   ]
 }
