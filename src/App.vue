@@ -2,19 +2,21 @@
   <div id="app-root">
     <!-- Welcome screen when no drawing is open -->
     <div v-if="!showViewer" class="welcome-screen">
-      <WelcomeScreen
+      <AppShell
         :recent-files="recentFiles"
         :open-mode="store.openMode"
         @open="openFromDialog"
         @open-path="openPath"
         @new-drawing="handleNewDrawing"
         @update:open-mode="store.openMode = $event"
+        @clear-recent="handleClearRecent"
+        @remove-recent="handleRemoveRecent"
         @file="handleBrowserFile"
       />
       <!-- Stay on the welcome UI while CAD chunks load -->
       <div v-if="preparingViewer" class="preparing-overlay" aria-live="polite">
         <div class="preparing-spinner" />
-        <p>Preparing viewer…</p>
+        <p>{{ hostMessages.preparing }}</p>
       </div>
     </div>
 
@@ -39,6 +41,7 @@
 </template>
 
 <script setup lang="ts">
+import { getCurrentWindow } from '@tauri-apps/api/window'
 import { message } from '@tauri-apps/plugin-dialog'
 import {
   computed,
@@ -52,7 +55,14 @@ import {
   type Component
 } from 'vue'
 
-import WelcomeScreen from './components/WelcomeScreen.vue'
+import AppShell from './components/AppShell.vue'
+import {
+  hostLocale,
+  hostMessages,
+  hostT,
+  setHostLocale,
+  type AppLocale
+} from './i18n'
 import { initDragDrop } from './desktop/dragDrop'
 import { initMenu, rebuildMenu } from './desktop/menu'
 import {
@@ -61,6 +71,7 @@ import {
   pickDrawingFile,
   readDrawingFile
 } from './desktop/openFiles'
+import { isTauri } from './desktop/platform'
 import {
   addRecentFile,
   clearRecentFiles,
@@ -85,6 +96,7 @@ const recentFiles = ref<RecentFile[]>([])
 
 let i18nInstalled = false
 const MlCadViewer = shallowRef<Component>()
+let syncCoreLocale: ((locale: AppLocale) => void) | null = null
 
 // Capture at setup time: `getCurrentInstance()` is null inside async callbacks.
 const app = getCurrentInstance()!.appContext.app
@@ -92,9 +104,9 @@ const app = getCurrentInstance()!.appContext.app
 const loadCadViewer = async () => {
   if (MlCadViewer.value) return
   const [
-    { LIBREDWG_PARSER_WORKER_FILE, AcApSettingManager },
+    { LIBREDWG_PARSER_WORKER_FILE, AcApSettingManager, AcApI18n },
     { registerLibreDwgConverter },
-    { initializeLocale },
+    { initializeLocale, setCoreLocale, isApplyingCoreLocale },
     { MlCadViewer: Viewer, i18n }
   ] = await Promise.all([
     import('@mlightcad/cad-simple-viewer'),
@@ -109,6 +121,16 @@ const loadCadViewer = async () => {
   })
   // Merge host command descriptions before the viewer mounts.
   initializeLocale()
+  // Keep the host UI/native menu and the CAD core on the same locale. The CAD
+  // core falls back to English for locales its bundled catalogs lack.
+  syncCoreLocale = setCoreLocale
+  AcApI18n.events.localeChanged.addEventListener(args => {
+    // Ignore the echo of host-initiated changes: a host locale without engine
+    // catalogs (e.g. Japanese) is applied as English and must not snap the
+    // host UI back to English.
+    if (!isApplyingCoreLocale()) setHostLocale(args.new)
+  })
+  syncCoreLocale(hostLocale.value)
   // Opt into GPL DWG support before the viewer opens any drawing.
   registerLibreDwgConverter(`./assets/${LIBREDWG_PARSER_WORKER_FILE}`)
   if (!i18nInstalled) {
@@ -190,7 +212,7 @@ const prepareThenOpen = async (open: () => void): Promise<boolean> => {
     return true
   } catch (error) {
     console.error('Failed to load CAD viewer', error)
-    await message('Failed to load the CAD viewer module.', {
+    await message(hostT().dialog.loadViewerFailed, {
       title: 'MLightCAD Studio',
       kind: 'error'
     })
@@ -224,7 +246,7 @@ const closeDrawing = () => {
 
 const openPath = async (path: string) => {
   if (!isDrawingPath(path)) {
-    await message(`Unsupported file type:\n${path}`, {
+    await message(`${hostT().dialog.unsupportedFileType}\n${path}`, {
       title: 'MLightCAD Studio',
       kind: 'warning'
     })
@@ -240,7 +262,7 @@ const openPath = async (path: string) => {
     // The file may have been moved or deleted: drop it from the recent list.
     recentFiles.value = await removeRecentFile(path)
     await rebuildMenu()
-    await message(`Failed to open drawing:\n${path}`, {
+    await message(`${hostT().dialog.openFailed}\n${path}`, {
       title: 'MLightCAD Studio',
       kind: 'error'
     })
@@ -281,17 +303,29 @@ const openFromDialog = async () => {
   }
 }
 
+const handleClearRecent = async () => {
+  recentFiles.value = await clearRecentFiles()
+  await rebuildMenu()
+}
+
+const handleRemoveRecent = async (path: string) => {
+  recentFiles.value = await removeRecentFile(path)
+  await rebuildMenu()
+}
+
 const menuHandlers = {
   onOpen: openFromDialog,
   onNew: handleNewDrawing,
   onOpenRecent: openPath,
-  onClearRecent: async () => {
-    recentFiles.value = await clearRecentFiles()
-    await rebuildMenu()
-  },
+  onClearRecent: handleClearRecent,
   onCloseDrawing: closeDrawing,
   getRecentFiles: () => recentFiles.value
 }
+
+watch(hostLocale, locale => {
+  syncCoreLocale?.(locale)
+  void rebuildMenu()
+})
 
 watch(
   () => store.selectedPath,
@@ -314,8 +348,54 @@ const bootstrapDesktop = async () => {
   }
 }
 
+const toggleFullscreen = async (): Promise<void> => {
+  const win = getCurrentWindow()
+  await win.setFullscreen(!(await win.isFullscreen()))
+}
+
+const isEditableTarget = (target: EventTarget | null): boolean => {
+  const el = target as HTMLElement | null
+  if (el == null) return false
+  const tag = el.tagName
+  return tag === 'INPUT' || tag === 'TEXTAREA' || el.isContentEditable
+}
+
+// The native File / View / Help menus were removed in favor of the ribbon, so
+// their accelerators are handled directly here to keep them available.
+const onWindowKeydown = (event: KeyboardEvent): void => {
+  if (event.key === 'F11') {
+    // In a plain browser leave F11 to the browser's own fullscreen handling.
+    if (!isTauri()) return
+    event.preventDefault()
+    void toggleFullscreen()
+    return
+  }
+  if (
+    !(event.ctrlKey || event.metaKey) ||
+    event.altKey ||
+    isEditableTarget(event.target)
+  ) {
+    return
+  }
+  switch (event.key.toLowerCase()) {
+    case 'o':
+      event.preventDefault()
+      void openFromDialog()
+      break
+    case 'n':
+      event.preventDefault()
+      void handleNewDrawing()
+      break
+    case 'w':
+      event.preventDefault()
+      void closeDrawing()
+      break
+  }
+}
+
 onMounted(() => {
   void bootstrapDesktop()
+  window.addEventListener('keydown', onWindowKeydown)
 
   const startPrefetch = () => {
     if (showViewer.value || preparingViewer.value) return
@@ -330,6 +410,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  window.removeEventListener('keydown', onWindowKeydown)
   unlistenDragDrop?.()
   unlistenOpenFiles?.()
 })

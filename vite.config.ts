@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs'
+import { existsSync, readdirSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -13,6 +13,68 @@ import {
 } from './vite/rollupOutput'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
+
+/**
+ * Absolute path to dayjs's ESM build.
+ *
+ * dayjs is not a direct dependency of this app, so pnpm does not hoist it to
+ * the top-level `node_modules` and `require.resolve` cannot find it from any
+ * package context. Locate it on disk instead: either a top-level hoist (non
+ * pnpm) or the `dayjs@<version>` directory inside pnpm's `.pnpm` store. Used
+ * by the dev-only alias in `resolve.alias` below.
+ */
+const dayjsEsmDir = (() => {
+  const topLevel = resolve(__dirname, 'node_modules/dayjs/esm')
+  if (existsSync(resolve(topLevel, 'index.js'))) return topLevel
+  try {
+    const pnpmDir = resolve(__dirname, 'node_modules/.pnpm')
+    const match = readdirSync(pnpmDir).find(name => name.startsWith('dayjs@'))
+    if (match) {
+      const esm = resolve(pnpmDir, match, 'node_modules/dayjs/esm')
+      if (existsSync(resolve(esm, 'index.js'))) return esm
+    }
+  } catch {
+    /* pnpm store not present */
+  }
+  return undefined
+})()
+
+/**
+ * Dev-only Vite plugin that resolves bare `dayjs` imports to dayjs's real ESM
+ * build. All three of these make a plain alias insufficient:
+ *   1. pnpm does not hoist dayjs (it is not a direct dependency), so it is not
+ *      resolvable from its consumers (element-plus, the viewer dist).
+ *   2. dayjs's `main` entry is a UMD build (`dayjs.min.js`) with no ESM default
+ *      export, which throws a SyntaxError when served raw.
+ *   3. The ESM build is laid out inconsistently — `index.js` and `locale/*.js`
+ *      are files, but each `plugin/*` is a *directory* containing `index.js`.
+ * This resolver probes both shapes. Production rollup already resolves and
+ * interops dayjs correctly, so the plugin is only registered in serve mode.
+ */
+const dayjsEsmResolver = (esmDir: string) => ({
+  name: 'dayjs-esm-resolver',
+  enforce: 'pre' as const,
+  resolveId(source: string): string | null {
+    if (source === 'dayjs') {
+      return resolve(esmDir, 'index.js')
+    }
+    if (!source.startsWith('dayjs/')) {
+      return null
+    }
+    const rest = source.slice('dayjs/'.length)
+    const noExt = rest.endsWith('.js') ? rest.slice(0, -3) : rest
+    // `locale/en.js` is a file; `plugin/customParseFormat(.js)` is a directory
+    // with an `index.js`. Probe both.
+    const candidates = [
+      resolve(esmDir, rest),
+      resolve(esmDir, noExt, 'index.js')
+    ]
+    for (const candidate of candidates) {
+      if (existsSync(candidate)) return candidate
+    }
+    return null
+  }
+})
 
 /**
  * Runtime assets copied verbatim into `dist/assets`.
@@ -100,6 +162,11 @@ export default defineConfig(({ command, mode }) => {
     plugins.push(visualizer())
   }
 
+  // Redirect bare `dayjs` imports to the ESM build in dev (see dayjsEsmResolver).
+  if (command === 'serve' && dayjsEsmDir) {
+    plugins.push(dayjsEsmResolver(dayjsEsmDir))
+  }
+
   return {
     // Relative base keeps worker/asset URLs valid under Tauri's custom protocol.
     base: './',
@@ -107,7 +174,10 @@ export default defineConfig(({ command, mode }) => {
     envPrefix: ['VITE_', 'TAURI_ENV_*'],
     resolve: {
       // Resolve `three` / renderer entries from this package so nested imports
-      // inside the viewer's prebuilt dist still resolve under pnpm.
+      // inside the viewer's prebuilt dist still resolve under pnpm. Bare
+      // `dayjs` imports are redirected to the ESM build by the dev-only
+      // `dayjsEsmResolver` plugin (registered above) instead of an alias,
+      // because the ESM layout mixes files and plugin directories.
       alias: examplePeerPackageAliases(__dirname)
     },
     optimizeDeps: {

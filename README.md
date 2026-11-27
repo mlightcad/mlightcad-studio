@@ -5,11 +5,14 @@ Desktop edition of [MLightCAD](https://github.com/mlightcad/cad-viewer) — a fu
 ## Features
 
 - Open `.dwg` and `.dxf` drawings through a native file dialog or by dropping files onto the window
-- Native application menu (File / View / Help, plus the macOS app menu) with familiar shortcuts
+- macOS application menu plus shell-level shortcuts (`Ctrl/Cmd+O`, `Ctrl/Cmd+N`, `Ctrl/Cmd+W`, `F11`); the CAD ribbon provides the File / View / Help menus on every platform
 - `.dwg` / `.dxf` file associations: double-click a drawing to open it in MLightCAD Studio
 - Single instance: opening another drawing focuses the running window instead of starting a second app
-- Recent drawings list, persisted across restarts and mirrored in the File → Open Recent submenu
+- Recent drawings list on the launcher, persisted across restarts, with copy-path and remove actions
 - Read / Review / Edit open modes, matching the web demo
+- Localized welcome screen, dialogs and native menus in English, 简体中文, 日本語, 한국어, Türkçe, Čeština and العربية, including Arabic RTL layout
+- Language selection is synchronized with the CAD viewer and persisted across restarts; the drawing UI falls back to English for languages its bundled catalogs do not include yet
+- Collapsible launcher sidebar with Home and About pages
 - Window size and position are restored on the next launch
 - Full CAD UI from `@mlightcad/cad-viewer`: ribbon, command line, layers, measurements, markup and export plugins
 - DWG support via the optional GPL-licensed [LibreDWG](https://www.gnu.org/software/libredwg/) converter (`@mlightcad/libredwg-converter`)
@@ -21,7 +24,7 @@ Desktop edition of [MLightCAD](https://github.com/mlightcad/cad-viewer) — a fu
 | UI | Vue 3, Vite, Element Plus |
 | CAD engine | `@mlightcad/cad-viewer`, `@mlightcad/cad-simple-viewer`, `@mlightcad/three-renderer` |
 | Desktop shell | Tauri 2 (Rust), `tao`/`wry` |
-| Desktop integration | `tauri-plugin-dialog`, `tauri-plugin-fs`, `tauri-plugin-store`, `tauri-plugin-window-state`, `tauri-plugin-single-instance`, `tauri-plugin-opener` |
+| Desktop integration | `tauri-plugin-dialog`, `tauri-plugin-fs`, `tauri-plugin-store`, `tauri-plugin-window-state`, `tauri-plugin-single-instance`, `tauri-plugin-opener`, `tauri-plugin-os` |
 | CI/CD | GitHub Actions (`pnpm`, `rust-cache`, `tauri-action`) |
 
 ## Prerequisites
@@ -123,10 +126,11 @@ macOS signing/notarization is optional. Set the `APPLE_CERTIFICATE`, `APPLE_CERT
 
 ```
 ├─ src/                    Vue frontend
-│  ├─ components/          Welcome screen
+│  ├─ components/          Launcher shell, welcome and about screens
 │  ├─ desktop/             Tauri bridge (dialog, drag & drop, menu, recent files, startup)
+│  ├─ i18n/                Host UI translations, locale detection and persistence
 │  ├─ commands/            Custom CAD commands (quit/exit)
-│  └─ locale/              Host locale messages merged into the viewer
+│  └─ locale/              Command descriptions merged into the viewer
 ├─ src-tauri/              Rust/Tauri shell
 │  ├─ src/                 main.rs / lib.rs
 │  ├─ capabilities/        Permission grants
@@ -138,6 +142,7 @@ macOS signing/notarization is optional. Set the `APPLE_CERTIFICATE`, `APPLE_CERT
 
 ## Known limitations
 
+- Japanese and Korean translations are present in the upstream development branch but are not shipped in `@mlightcad/cad-viewer@1.7.8`; the desktop UI will add them when upgrading to an engine release that includes them.
 - Only one drawing is open at a time; dropping multiple files opens the first one.
 - Export actions rely on the web download flow. If your platform blocks downloads inside the webview, use the web version or save via the CAD command line.
 - Default fonts/templates are fetched from jsDelivr (`https://cdn.jsdelivr.net`). A network connection is recommended for best text rendering.
