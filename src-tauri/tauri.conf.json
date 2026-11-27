@@ -26,7 +26,8 @@
     ],
     "security": {
       "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data: https://cdn.jsdelivr.net; connect-src 'self' ipc: http://ipc.localhost https://cdn.jsdelivr.net; worker-src 'self' blob:; child-src 'self' blob:; object-src 'self'",
-      "devCsp": "default-src 'self' http://localhost:5173; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' http://localhost:5173; style-src 'self' 'unsafe-inline' http://localhost:5173; img-src 'self' data: blob:; font-src 'self' data: https://cdn.jsdelivr.net; connect-src 'self' ipc: http://ipc.localhost ws://localhost:5173 http://localhost:5173 https://cdn.jsdelivr.net; worker-src 'self' blob:; child-src 'self' blob:; object-src 'self'"
+      "devCsp": "default-src 'self' http://localhost:5173; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' http://localhost:5173; style-src 'self' 'unsafe-inline' http://localhost:5173; img-src 'self' data: blob:; font-src 'self' data: https://cdn.jsdelivr.net; connect-src 'self' ipc: http://ipc.localhost ws://localhost:5173 http://localhost:5173 https://cdn.jsdelivr.net; worker-src 'self' blob:; child-src 'self' blob:; object-src 'self'",
+      "dangerousDisableAssetCspModification": ["style-src"]
     }
   },
   "bundle": {
