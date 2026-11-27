@@ -1,5 +1,8 @@
-import { i18n as viewerI18n } from '@mlightcad/cad-viewer'
-import { AcApI18n, type AcApLocale } from '@mlightcad/cad-simple-viewer'
+import { i18n as viewerI18n } from '@mlightcad/cad-editor'
+import {
+  AcApI18n,
+  type AcApLocale
+} from '@mlightcad/cad-simple-viewer/file-open-panel'
 
 import { COMMAND_DESCRIPTIONS } from './commandDescriptions'
 import { LOCALE_OPTIONS, type AppLocale } from '../i18n'
@@ -18,9 +21,9 @@ let applyingCoreLocale = false
 /**
  * Merge the host app's command descriptions into all viewer locales.
  *
- * `@mlightcad/cad-viewer` ships its own `vue-i18n` instance, so messages must be
- * registered on both registries: `AcApI18n` (framework-free core translation)
- * and `viewerI18n` (the Vue UI).
+ * `@mlightcad/cad-editor` ships its own `vue-i18n` instance, so messages must be
+ * registered on both registries: `AcApI18n` (framework-free core translation,
+ * the landing singleton the editor UI uses) and `viewerI18n` (the Vue UI).
  */
 export const initializeLocale = () => {
   for (const { locale } of LOCALE_OPTIONS) {

@@ -76,7 +76,7 @@ export function examplePeerPackageAliases(fromPackageDir: string): Alias[] {
  * plugin), and because the upload screen statically imports Vue through
  * element-plus, the app entry ends up statically importing that viewer chunk.
  * That drags the whole ~2 MB viewer stack into the initial payload and defeats
- * the lazy `import()` of `@mlightcad/cad-viewer`.
+ * the lazy `import()` of `@mlightcad/cad-editor`.
  */
 const VENDOR_PACKAGE_PATTERNS = [
   /\/node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?vue\//,

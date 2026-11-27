@@ -1,6 +1,6 @@
 # MLightCAD Studio
 
-Desktop edition of [MLightCAD](https://github.com/mlightcad/cad-viewer) — a fully offline DWG/DXF viewer and editor powered by a browser rendering engine. The app wraps the published `@mlightcad/cad-viewer` Vue component in a [Tauri 2](https://v2.tauri.app/) shell, so drawings are parsed, rendered and edited locally without any backend service.
+Desktop edition of [MLightCAD](https://github.com/mlightcad/cad-viewer) — a fully offline DWG/DXF viewer and editor powered by a browser rendering engine. The app wraps the published `@mlightcad/cad-editor` Vue component in a [Tauri 2](https://v2.tauri.app/) shell, so drawings are parsed, rendered and edited locally without any backend service.
 
 ## Features
 
@@ -11,10 +11,10 @@ Desktop edition of [MLightCAD](https://github.com/mlightcad/cad-viewer) — a fu
 - Recent drawings list on the launcher, persisted across restarts, with copy-path and remove actions
 - Read / Review / Edit open modes, matching the web demo
 - Localized welcome screen, dialogs and native menus in English, 简体中文, 日本語, 한국어, Türkçe, Čeština and العربية, including Arabic RTL layout
-- Language selection is synchronized with the CAD viewer and persisted across restarts; the drawing UI falls back to English for languages its bundled catalogs do not include yet
+- Language selection is synchronized between the launcher and the CAD viewer (including the ribbon selector) and persisted across restarts
 - Collapsible launcher sidebar with Home and About pages
 - Window size and position are restored on the next launch
-- Full CAD UI from `@mlightcad/cad-viewer`: ribbon, command line, layers, measurements, markup and export plugins
+- Full CAD UI from `@mlightcad/cad-editor`: ribbon, command line, layers, measurements, markup and export plugins
 - DWG support via the optional GPL-licensed [LibreDWG](https://www.gnu.org/software/libredwg/) converter (`@mlightcad/libredwg-converter`)
 
 ## Tech stack
@@ -22,7 +22,7 @@ Desktop edition of [MLightCAD](https://github.com/mlightcad/cad-viewer) — a fu
 | Layer | Technology |
 | --- | --- |
 | UI | Vue 3, Vite, Element Plus |
-| CAD engine | `@mlightcad/cad-viewer`, `@mlightcad/cad-simple-viewer`, `@mlightcad/three-renderer` |
+| CAD engine | `@mlightcad/cad-editor`, `@mlightcad/cad-simple-viewer`, `@mlightcad/three-renderer` |
 | Desktop shell | Tauri 2 (Rust), `tao`/`wry` |
 | Desktop integration | `tauri-plugin-dialog`, `tauri-plugin-fs`, `tauri-plugin-store`, `tauri-plugin-window-state`, `tauri-plugin-single-instance`, `tauri-plugin-opener`, `tauri-plugin-os` |
 | CI/CD | GitHub Actions (`pnpm`, `rust-cache`, `tauri-action`) |
@@ -72,12 +72,12 @@ Useful scripts:
 | `pnpm typecheck` | Run `vue-tsc --noEmit` |
 | `pnpm tauri:dev` | Run the desktop app in development mode |
 | `pnpm tauri:build` | Build and bundle the desktop app |
-| `pnpm version:sync` | Align the app version with `@mlightcad/cad-viewer` |
+| `pnpm version:sync` | Align the app version with `@mlightcad/cad-editor` |
 | `pnpm release` | Create and push a release tag (see below) |
 
 ## Versioning
 
-The desktop app tracks the version of its CAD engine. `package.json → dependencies["@mlightcad/cad-viewer"]` is the single source of truth, and the app version must match it (currently **1.7.8**). Tauri reads the version from `package.json` through `tauri.conf.json → version`, so installers automatically use the same number.
+The desktop app tracks the version of its CAD engine. `package.json → dependencies["@mlightcad/cad-editor"]` is the single source of truth, and the app version must match it (currently **1.8.0-preview.6**). Tauri reads the version from `package.json` through `tauri.conf.json → version`, so installers automatically use the same number.
 
 When MLightCAD publishes a new version:
 
@@ -97,10 +97,10 @@ git commit -m "chore: bump mlightcad to vX.Y.Z"
 
 ## Releasing
 
-`tools/release.mjs` is adapted from the upstream [`cad-viewer/tools/release.mjs`](https://github.com/mlightcad/cad-viewer/blob/main/tools/release.mjs). It reuses the same safety checks (clean tree, `main` branch, unique tag, semver/preview validation) but derives the version from `@mlightcad/cad-viewer` instead of a lockstep monorepo, and never touches npm.
+`tools/release.mjs` is adapted from the upstream [`cad-viewer/tools/release.mjs`](https://github.com/mlightcad/cad-viewer/blob/main/tools/release.mjs). It reuses the same safety checks (clean tree, `main` branch, unique tag, semver/preview validation) but derives the version from `@mlightcad/cad-editor` instead of a lockstep monorepo, and never touches npm.
 
 ```bash
-# Release the version currently declared by @mlightcad/cad-viewer
+# Release the version currently declared by @mlightcad/cad-editor
 pnpm release
 
 # Preview releases use the X.Y.Z-preview.N suffix
@@ -142,7 +142,6 @@ macOS signing/notarization is optional. Set the `APPLE_CERTIFICATE`, `APPLE_CERT
 
 ## Known limitations
 
-- Japanese and Korean translations are present in the upstream development branch but are not shipped in `@mlightcad/cad-viewer@1.7.8`; the desktop UI will add them when upgrading to an engine release that includes them.
 - Only one drawing is open at a time; dropping multiple files opens the first one.
 - Export actions rely on the web download flow. If your platform blocks downloads inside the webview, use the web version or save via the CAD command line.
 - Default fonts/templates are fetched from jsDelivr (`https://cdn.jsdelivr.net`). A network connection is recommended for best text rendering.

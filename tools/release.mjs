@@ -4,7 +4,7 @@
  *
  * Adapted from cad-viewer/tools/release.mjs. Differences from upstream:
  * - Single app package, no monorepo lockstep / changesets / npm publishing.
- * - The release version is derived from the `@mlightcad/cad-viewer` dependency
+ * - The release version is derived from the `@mlightcad/cad-editor` dependency
  *   (the CAD engine this app wraps) instead of packages/* versions.
  * - `--sync` writes the engine version into package.json + src-tauri/Cargo.toml
  *   so Tauri bundles always match the engine version.
@@ -24,7 +24,7 @@ const packageJsonPath = path.join(rootDir, 'package.json');
 const cargoTomlPath = path.join(rootDir, 'src-tauri', 'Cargo.toml');
 
 /** Package whose version the desktop app tracks. */
-const ENGINE_PACKAGE = '@mlightcad/cad-viewer';
+const ENGINE_PACKAGE = '@mlightcad/cad-editor';
 
 const PREVIEW_VERSION_RE = /^\d+\.\d+\.\d+-preview\.\d+$/;
 const ANY_VERSION_RE = /^\d+\.\d+\.\d+(-preview\.\d+)?$/;
