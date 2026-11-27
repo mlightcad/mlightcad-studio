@@ -102,15 +102,17 @@ const app = getCurrentInstance()!.appContext.app
 const loadCadViewer = async () => {
   if (MlCadViewer.value) return
   const [
-    { LIBREDWG_PARSER_WORKER_FILE, AcApSettingManager, AcApI18n },
+    { LIBREDWG_PARSER_WORKER_FILE, AcApSettingManager },
+    { AcApI18n },
     { registerLibreDwgConverter },
     { initializeLocale, setCoreLocale, isApplyingCoreLocale },
     { MlCadViewer: Viewer, i18n }
   ] = await Promise.all([
     import('@mlightcad/cad-simple-viewer'),
+    import('@mlightcad/cad-simple-viewer/file-open-panel'),
     import('./registerLibreDwg'),
     import('./locale'),
-    import('@mlightcad/cad-viewer')
+    import('@mlightcad/cad-editor')
   ])
 
   // Isolate this app's persisted prefs from other cad-* apps sharing the origin.
@@ -123,9 +125,8 @@ const loadCadViewer = async () => {
   // core falls back to English for locales its bundled catalogs lack.
   syncCoreLocale = setCoreLocale
   AcApI18n.events.localeChanged.addEventListener(args => {
-    // Ignore the echo of host-initiated changes: a host locale without engine
-    // catalogs (e.g. Japanese) is applied as English and must not snap the
-    // host UI back to English.
+    // Ignore the echo of host-initiated changes so applying a host locale does
+    // not bounce back into the host UI as if the user picked it in the viewer.
     if (!isApplyingCoreLocale()) setHostLocale(args.new)
   })
   syncCoreLocale(hostLocale.value)

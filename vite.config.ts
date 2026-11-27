@@ -102,11 +102,11 @@ const VIEWER_RUNTIME_SRC = `./node_modules/@mlightcad/cad-html-plugin/dist/${VIE
  */
 const LAZY_VIEWER_PACKAGES = [
   '@mlightcad/cad-agent-plugin',
+  '@mlightcad/cad-editor',
   '@mlightcad/cad-html-plugin',
   '@mlightcad/cad-pdf-plugin',
   '@mlightcad/cad-simple-viewer',
   '@mlightcad/cad-svg-plugin',
-  '@mlightcad/cad-viewer',
   '@mlightcad/pdf-renderer',
   '@mlightcad/three-renderer'
 ]
@@ -178,7 +178,20 @@ export default defineConfig(({ command, mode }) => {
       // `dayjs` imports are redirected to the ESM build by the dev-only
       // `dayjsEsmResolver` plugin (registered above) instead of an alias,
       // because the ESM layout mixes files and plugin directories.
-      alias: examplePeerPackageAliases(__dirname)
+      alias: [
+        // The published `development` condition of this subpath points at
+        // `src/file-open-panel.ts`, which imports files that are not shipped in
+        // the npm package. Pin it to the prebuilt bundle so dev mode matches the
+        // production resolve (`default` condition).
+        {
+          find: '@mlightcad/cad-simple-viewer/file-open-panel',
+          replacement: resolve(
+            __dirname,
+            'node_modules/@mlightcad/cad-simple-viewer/dist/cad-simple-viewer-file-open-panel.js'
+          )
+        },
+        ...examplePeerPackageAliases(__dirname)
+      ]
     },
     optimizeDeps: {
       // Pre-bundle the PDF stack so the first lazy import of the PDF plugin
