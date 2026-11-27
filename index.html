@@ -27,68 +27,6 @@
       @keyframes spin {
         to { transform: rotate(360deg); }
       }
-
-      /*
-       * Critical CAD viewer layout shell.
-       *
-       * The cad-viewer stylesheet is shipped in a lazy-loaded chunk, so on the
-       * first paint (cold / slow loads, especially in `tauri dev`) there is a
-       * window where `.ml-cad-layout` has no height yet. The busy overlay and
-       * the side toolbars are positioned against that element, so when it
-       * collapses they paint in the top-left corner. These rules are declared
-       * render-blocking here (before any JS runs) so the viewer shell is always
-       * correctly sized; the real cad-viewer CSS re-declares the same rules
-       * once it loads, so there is no conflict.
-       */
-      .ml-cad-container {
-        position: absolute;
-        inset: 0;
-        display: block;
-        outline: none;
-        z-index: 1;
-        pointer-events: auto;
-      }
-      .ml-cad-viewer-container {
-        position: fixed;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        z-index: 2;
-        pointer-events: auto;
-        overflow: hidden;
-      }
-      .ml-cad-layout {
-        position: relative;
-        width: 100%;
-        height: 100%;
-      }
-      .ml-cad-viewer-container > .el-config-provider {
-        display: block;
-        height: 100%;
-      }
-      .ml-cad-header {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 6;
-      }
-      .ml-cad-main {
-        position: absolute;
-        top: var(--ml-header-height, 0px);
-        left: 0;
-        right: 0;
-        bottom: var(--ml-status-bar-height, 30px);
-        min-height: 0;
-      }
-      .ml-cad-footer {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 6;
-      }
     </style>
   </head>
   <body>

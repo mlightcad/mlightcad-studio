@@ -204,6 +204,9 @@ export default defineConfig(({ command, mode }) => {
     },
     build: {
       outDir: 'dist',
+      // Viewer overlays and dialogs must not wait for lazy component CSS.
+      // Keep every style in the render-blocking entry stylesheet; JS stays split.
+      cssCodeSplit: false,
       modulePreload: false,
       minify: true,
       rollupOptions: {
