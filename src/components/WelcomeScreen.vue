@@ -21,23 +21,6 @@
             <span>{{ t.welcome.newDrawing }}</span>
           </button>
         </div>
-        <div class="mode">
-          <span class="mode-label">{{ t.welcome.openMode }}</span>
-          <div class="segmented" role="radiogroup" :aria-label="t.welcome.openMode">
-            <button
-              v-for="mode in modes"
-              :key="mode.value"
-              type="button"
-              class="segment"
-              :class="{ 'is-active': openMode === mode.value }"
-              role="radio"
-              :aria-checked="openMode === mode.value"
-              @click="emit('update:open-mode', mode.value)"
-            >
-              {{ mode.label }}
-            </button>
-          </div>
-        </div>
       </div>
       <div class="hero-art">
         <BlueprintArt variant="flange" />
@@ -169,41 +152,35 @@
       hidden
       @change="handleBrowserFile"
     />
+
+    <PageFooter />
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 
 import { hostMessages } from '../i18n'
-import { AcEdOpenMode } from '../openOptions'
 import type { RecentFile } from '../store'
 import AppIcon from './AppIcon.vue'
 import BlueprintArt from './BlueprintArt.vue'
+import PageFooter from './PageFooter.vue'
 import { isTauri } from '../desktop/platform'
 
 defineProps<{
   recentFiles: RecentFile[]
-  openMode: AcEdOpenMode
 }>()
 
 const emit = defineEmits<{
   open: []
   'open-path': [path: string]
   'new-drawing': []
-  'update:open-mode': [mode: AcEdOpenMode]
   'clear-recent': []
   'remove-recent': [path: string]
   file: [file: File]
 }>()
 
 const t = hostMessages
-
-const modes = computed(() => [
-  { value: AcEdOpenMode.Read, label: t.value.welcome.modeRead },
-  { value: AcEdOpenMode.Review, label: t.value.welcome.modeReview },
-  { value: AcEdOpenMode.Write, label: t.value.welcome.modeWrite }
-])
 
 const menuPath = ref<string | null>(null)
 const copiedPath = ref<string | null>(null)
@@ -335,52 +312,6 @@ const handleBrowserFile = (event: Event) => {
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 22px;
-}
-
-.mode {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-  margin-top: 18px;
-}
-
-.mode-label {
-  font-size: 12.5px;
-  color: var(--text-faint);
-}
-
-.segmented {
-  display: inline-flex;
-  padding: 3px;
-  border: 1px solid rgba(140, 175, 230, 0.18);
-  border-radius: 9px;
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.segment {
-  padding: 5px 13px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--text-dim);
-  font-family: inherit;
-  font-size: 12.5px;
-  cursor: pointer;
-  transition:
-    background-color 0.16s ease,
-    color 0.16s ease,
-    box-shadow 0.16s ease;
-}
-
-.segment:hover {
-  color: var(--text);
-}
-
-.segment.is-active {
-  background: linear-gradient(135deg, #2f74ff, #1e51d6);
-  color: #fff;
-  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.32);
 }
 
 .btn {
@@ -712,15 +643,30 @@ const handleBrowserFile = (event: Event) => {
   .hero {
     grid-template-columns: minmax(0, 1fr);
     min-height: 0;
+    align-items: flex-start;
+  }
+
+  .hero-copy {
+    position: relative;
+    z-index: 2;
   }
 
   .hero-art {
     position: absolute;
-    inset-inline-end: -150px;
-    top: -30px;
-    width: 480px;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     margin: 0;
-    opacity: 0.28;
+    opacity: 0.35;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .hero-art :deep(svg) {
+    max-height: none;
+    height: 100%;
+    width: auto;
+    margin-inline-start: auto;
   }
 
   .lede {

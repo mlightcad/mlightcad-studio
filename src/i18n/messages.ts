@@ -7,10 +7,6 @@ export interface WelcomeMessages {
   subtitle: string
   open: string
   newDrawing: string
-  openMode: string
-  modeRead: string
-  modeReview: string
-  modeWrite: string
   recent: string
   noRecent: string
   noRecentHint: string
@@ -124,10 +120,6 @@ const en: HostMessages = {
     subtitle: 'Open a DWG or DXF drawing and start efficient CAD work',
     open: 'Open Drawing…',
     newDrawing: 'New Drawing',
-    openMode: 'Open mode',
-    modeRead: 'Read',
-    modeReview: 'Review',
-    modeWrite: 'Edit',
     recent: 'Recent',
     noRecent: 'No recent drawings',
     noRecentHint: 'Drawings you open will appear here.',
@@ -208,10 +200,6 @@ const zh: HostMessages = {
     subtitle: '打开 DWG 或 DXF 图纸，开始高效的 CAD 工作',
     open: '打开图纸…',
     newDrawing: '新建图纸',
-    openMode: '打开模式',
-    modeRead: '仅查看',
-    modeReview: '批阅',
-    modeWrite: '编辑',
     recent: '最近打开',
     noRecent: '暂无最近打开的图纸',
     noRecentHint: '打开图纸后，将显示在这里。',
@@ -292,10 +280,6 @@ const ja: HostMessages = {
     subtitle: 'DWG または DXF 図面を開いて、効率的な CAD 作業を始めましょう',
     open: '図面を開く…',
     newDrawing: '新規図面',
-    openMode: '開き方',
-    modeRead: '参照',
-    modeReview: 'レビュー',
-    modeWrite: '編集',
     recent: '最近開いた図面',
     noRecent: '最近開いた図面はありません',
     noRecentHint: '開いた図面がここに表示されます。',
@@ -376,10 +360,6 @@ const ko: HostMessages = {
     subtitle: 'DWG 또는 DXF 도면을 열고 효율적인 CAD 작업을 시작하세요',
     open: '도면 열기…',
     newDrawing: '새 도면',
-    openMode: '열기 모드',
-    modeRead: '보기',
-    modeReview: '검토',
-    modeWrite: '편집',
     recent: '최근 도면',
     noRecent: '최근에 연 도면이 없습니다',
     noRecentHint: '연 도면이 여기에 표시됩니다.',
@@ -460,10 +440,6 @@ const tr: HostMessages = {
     subtitle: 'Bir DWG veya DXF çizimi açın, verimli CAD çalışmaya başlayın',
     open: 'Çizim Aç…',
     newDrawing: 'Yeni Çizim',
-    openMode: 'Açma modu',
-    modeRead: 'Görüntüle',
-    modeReview: 'İncele',
-    modeWrite: 'Düzenle',
     recent: 'Son açılanlar',
     noRecent: 'Son açılan çizim yok',
     noRecentHint: 'Açtığınız çizimler burada görünür.',
@@ -544,10 +520,6 @@ const cs: HostMessages = {
     subtitle: 'Otevřete výkres DWG nebo DXF a pusťte se do efektivní CAD práce',
     open: 'Otevřít výkres…',
     newDrawing: 'Nový výkres',
-    openMode: 'Režim otevření',
-    modeRead: 'Prohlížet',
-    modeReview: 'Revize',
-    modeWrite: 'Upravit',
     recent: 'Nedávné',
     noRecent: 'Žádné nedávné výkresy',
     noRecentHint: 'Otevřené výkresy se zobrazí zde.',
@@ -628,10 +600,6 @@ const ar: HostMessages = {
     subtitle: 'افتح رسم DWG أو DXF وابدأ عمل CAD بكفاءة',
     open: 'فتح رسم…',
     newDrawing: 'رسم جديد',
-    openMode: 'وضع الفتح',
-    modeRead: 'عرض',
-    modeReview: 'مراجعة',
-    modeWrite: 'تحرير',
     recent: 'فتح مؤخرًا',
     noRecent: 'لا توجد رسومات حديثة',
     noRecentHint: 'ستظهر الرسومات التي تفتحها هنا.',
