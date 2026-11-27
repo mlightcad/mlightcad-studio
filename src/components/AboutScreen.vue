@@ -112,25 +112,7 @@
       </div>
     </section>
 
-    <footer class="about-footer">
-      <div class="links">
-        <button type="button" class="link" @click="open(SITE_LINKS.website)">
-          <AppIcon name="globe" :size="14" />
-          <span>{{ t.about.website }}</span>
-        </button>
-        <span class="sep" aria-hidden="true">|</span>
-        <button type="button" class="link" @click="open(SITE_LINKS.docs)">
-          <AppIcon name="book" :size="14" />
-          <span>{{ t.about.docs }}</span>
-        </button>
-        <span class="sep" aria-hidden="true">|</span>
-        <button type="button" class="link" @click="open(SITE_LINKS.github)">
-          <AppIcon name="github" :size="15" />
-          <span>{{ t.about.github }}</span>
-        </button>
-      </div>
-      <span class="copyright">{{ t.about.copyright }}</span>
-    </footer>
+    <PageFooter />
   </section>
 </template>
 
@@ -139,14 +121,9 @@ import { hostMessages } from '../i18n'
 import { openExternal } from '../desktop/links'
 import AppIcon from './AppIcon.vue'
 import BlueprintArt from './BlueprintArt.vue'
+import PageFooter from './PageFooter.vue'
 
 const t = hostMessages
-
-const SITE_LINKS = {
-  website: 'https://mlightcad.com',
-  docs: 'https://mlightcad.com/cad-viewer/docs/',
-  github: 'https://github.com/mlightcad/cad-viewer'
-} as const
 
 const PRODUCT_LINKS = {
   viewer: 'https://mlightcad.com/cad-viewer.html',
@@ -381,71 +358,40 @@ const open = (url: string) => {
   color: var(--text-faint);
 }
 
-.about-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 14px;
-  margin-top: 18px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-  font-size: 12px;
-  color: var(--text-faint);
-}
-
-.links {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.link {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--text-dim);
-  font-family: inherit;
-  font-size: 12px;
-  cursor: pointer;
-  transition: color 0.16s ease;
-}
-
-.link:hover {
-  color: #9cc4ff;
-}
-
-.sep {
-  opacity: 0.35;
-}
-
-.copyright {
-  color: var(--text-faint);
-}
-
 @media (max-width: 1180px) {
   .about-art {
-    opacity: 0.65;
-    margin-inline-end: -120px;
+    opacity: 0.7;
+    margin-inline-end: 0;
   }
 }
 
 @media (max-width: 1040px) {
   .about-hero {
     grid-template-columns: minmax(0, 1fr);
+    align-items: flex-start;
+  }
+
+  .about-copy {
+    position: relative;
+    z-index: 2;
   }
 
   .about-art {
     position: absolute;
-    inset-inline-end: -170px;
-    top: -40px;
-    width: 500px;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     margin: 0;
-    opacity: 0.22;
+    opacity: 0.35;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .about-art :deep(svg) {
+    max-height: none;
+    height: 100%;
+    width: auto;
+    margin-inline-start: auto;
   }
 
   .adv-grid {

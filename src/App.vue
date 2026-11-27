@@ -4,11 +4,9 @@
     <div v-if="!showViewer" class="welcome-screen">
       <AppShell
         :recent-files="recentFiles"
-        :open-mode="store.openMode"
         @open="openFromDialog"
         @open-path="openPath"
         @new-drawing="handleNewDrawing"
-        @update:open-mode="store.openMode = $event"
         @clear-recent="handleClearRecent"
         @remove-recent="handleRemoveRecent"
         @file="handleBrowserFile"

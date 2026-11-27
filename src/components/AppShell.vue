@@ -113,11 +113,9 @@
             v-if="page === 'home'"
             key="home"
             :recent-files="recentFiles"
-            :open-mode="openMode"
             @open="emit('open')"
             @open-path="emit('open-path', $event)"
             @new-drawing="emit('new-drawing')"
-            @update:open-mode="emit('update:open-mode', $event)"
             @clear-recent="emit('clear-recent')"
             @remove-recent="emit('remove-recent', $event)"
             @file="emit('file', $event)"
@@ -133,7 +131,6 @@
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 
 import type { RecentFile } from '../store'
-import type { AcEdOpenMode } from '../openOptions'
 import {
   hostLocale,
   hostMessages,
@@ -147,14 +144,12 @@ import WelcomeScreen from './WelcomeScreen.vue'
 
 defineProps<{
   recentFiles: RecentFile[]
-  openMode: AcEdOpenMode
 }>()
 
 const emit = defineEmits<{
   open: []
   'open-path': [path: string]
   'new-drawing': []
-  'update:open-mode': [mode: AcEdOpenMode]
   'clear-recent': []
   'remove-recent': [path: string]
   file: [file: File]
@@ -389,16 +384,17 @@ onBeforeUnmount(() =>
   flex-direction: column;
   background:
     radial-gradient(
-      900px 520px at 78% -8%,
-      rgba(37, 99, 235, 0.22),
-      transparent 62%
+      640px 500px at 82% 26%,
+      rgba(96, 165, 250, 0.3),
+      rgba(59, 130, 246, 0.14) 38%,
+      transparent 68%
     ),
     radial-gradient(
-      720px 420px at 8% 108%,
-      rgba(14, 116, 144, 0.14),
-      transparent 60%
+      580px 340px at 68% 46%,
+      rgba(37, 99, 235, 0.22),
+      transparent 65%
     ),
-    linear-gradient(155deg, #070c16 0%, #0a1322 48%, #060a12 100%);
+    linear-gradient(155deg, #050a14 0%, #0c1b36 50%, #071024 100%);
 }
 
 .stage::before {
@@ -416,6 +412,33 @@ onBeforeUnmount(() =>
   );
   mask-image: radial-gradient(120% 95% at 62% 0%, #000 0%, transparent 74%);
   pointer-events: none;
+}
+
+.stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+      ellipse 900px 300px at 50% 115%,
+      rgba(37, 99, 235, 0.32),
+      rgba(59, 130, 246, 0.12) 30%,
+      transparent 65%
+    );
+  -webkit-mask-image: linear-gradient(
+    170deg,
+    transparent 0%,
+    #000 28%,
+    #000 72%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    170deg,
+    transparent 0%,
+    #000 28%,
+    #000 72%,
+    transparent 100%
+  );
 }
 
 .topbar {

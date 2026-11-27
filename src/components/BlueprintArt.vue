@@ -15,8 +15,8 @@
         </feMerge>
       </filter>
       <radialGradient id="bp-halo" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="#2f7bff" stop-opacity="0.26" />
-        <stop offset="55%" stop-color="#1d4ed8" stop-opacity="0.1" />
+        <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.45" />
+        <stop offset="40%" stop-color="#1d4ed8" stop-opacity="0.22" />
         <stop offset="100%" stop-color="#0b1d3a" stop-opacity="0" />
       </radialGradient>
       <linearGradient id="bp-sweep" x1="0" y1="0" x2="1" y2="1">
@@ -25,7 +25,7 @@
       </linearGradient>
     </defs>
 
-    <ellipse cx="410" cy="225" rx="290" ry="200" fill="url(#bp-halo)" />
+    <ellipse cx="410" cy="215" rx="340" ry="240" fill="url(#bp-halo)" />
 
     <!-- Flange / bearing wireframe -->
     <g v-if="variant === 'flange'" class="bp-lines">
@@ -193,7 +193,8 @@ const boltHoles = Array.from({ length: 8 }, (_, index) => {
 
 .bp-accent {
   stroke: url(#bp-sweep);
-  stroke-width: 1.2;
-  opacity: 0.85;
+  stroke-width: 1.6;
+  opacity: 0.95;
+  filter: drop-shadow(0 0 3px rgba(79, 157, 255, 0.5));
 }
 </style>
